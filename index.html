@@ -20,7 +20,7 @@ h1,h2{margin-top:0;text-align:center;}
 <div class="container">
 <h1>⚽ Fußball Anmeldung</h1>
 
-<!-- Benutzer wählt Zeit-Slot -->
+<!-- Benutzer Anmeldung -->
 <div id="userDiv" class="card">
   <h2>Benutzer Anmeldung</h2>
   <input type="text" id="userName" placeholder="Name"><br>
@@ -31,6 +31,15 @@ h1,h2{margin-top:0;text-align:center;}
   </select><br>
   <button onclick="registerUser()">Anmelden</button>
   <p id="loginError" style="color:red;"></p>
+</div>
+
+<!-- Admin Login -->
+<div id="adminLoginDiv" class="card">
+  <h2>Administrator Login</h2>
+  <input type="text" id="adminName" placeholder="Name"><br>
+  <input type="password" id="adminPassword" placeholder="Passwort"><br>
+  <button onclick="loginAdmin()">Login</button>
+  <p id="adminError" style="color:red;"></p>
 </div>
 
 <!-- Admin Bereich -->
@@ -66,31 +75,45 @@ function registerUser(){
   slots[slot].push(name);
   document.getElementById("userDiv").classList.add("hidden");
   alert(`Willkommen ${name}! Sie sind für ${slot} Uhr angemeldet.`);
-  renderAdmin();
+  renderAdmin(); // Adminbereich aktualisieren, falls bereits angemeldet
+}
+
+// Admin Login
+function loginAdmin(){
+  const name = document.getElementById("adminName").value.trim();
+  const password = document.getElementById("adminPassword").value;
+  const errorP = document.getElementById("adminError");
+  errorP.innerText="";
+  if(name === "Sven Weigel" && password === "12345"){
+    document.getElementById("adminLoginDiv").classList.add("hidden");
+    document.getElementById("adminDiv").classList.remove("hidden");
+    renderAdmin();
+  } else {
+    errorP.innerText = "Falscher Name oder Passwort!";
+  }
 }
 
 // Adminbereich anzeigen
 function renderAdmin(){
-  document.getElementById("adminDiv").classList.remove("hidden");
   const slotsDiv = document.getElementById("slots");
+  const assignSelect = document.getElementById("assignUserSelect");
   slotsDiv.innerHTML="";
+  assignSelect.innerHTML="";
   Object.keys(slots).forEach(s=>{
     slotsDiv.innerHTML += `<div class="slot-card"><strong>${s} Uhr:</strong> ${slots[s].join(", ") || "(keine Anmeldung)"}</div>`;
+    slots[s].forEach(u=>{
+      assignSelect.innerHTML += `<option value="${u}">${u}</option>`;
+    });
   });
-  const assignSelect = document.getElementById("assignUserSelect");
-  assignSelect.innerHTML="";
-  Object.values(slots).flat().forEach((u,i)=>{
-    assignSelect.innerHTML += `<option value="${i}">${u}</option>`;
-  });
+  renderTasks();
 }
 
 // Aufgabe vergeben
 function assignTask(){
-  const userIndex = document.getElementById("assignUserSelect").value;
+  const user = document.getElementById("assignUserSelect").value;
   const title = document.getElementById("taskTitle").value.trim();
-  if(!title){ alert("Aufgabe erforderlich"); return; }
-  const allUsers = Object.values(slots).flat();
-  tasks.push({user: allUsers[userIndex], title});
+  if(!user || !title){ alert("Benutzer und Aufgabe erforderlich"); return; }
+  tasks.push({user, title});
   document.getElementById("taskTitle").value="";
   renderTasks();
 }
