@@ -6,64 +6,21 @@
 <title>⚽ Fußball To-Do Liste</title>
 <style>
 :root{
-  --bg:#0b3d0b;       /* Fußball-Rasen */
-  --card:#ffffffcc;    /* leicht transparentes Weiß */
-  --text:#0b3d0b;
-  --accent:#ffd700;    /* Goldene Akzente */
-  --accent-hover:#ffcc00;
+  --bg:#0b3d0b; --card:#ffffffcc; --text:#0b3d0b; --accent:#ffd700; --accent-hover:#ffcc00;
 }
-body.dark{
-  --bg:#072107; 
-  --card:#1a1a1acc;
-  --text:#ffffff;
-  --accent:#ffd700;
-  --accent-hover:#ffcc00;
-}
-body{
-  font-family: 'Arial', sans-serif;
-  margin:0;
-  padding:20px;
-  background:var(--bg);
-  color:var(--text);
-  transition: background .3s,color .3s;
-}
+body.dark{--bg:#072107;--card:#1a1a1acc;--text:#fff;--accent:#ffd700;--accent-hover:#ffcc00;}
+body{font-family:'Arial',sans-serif;margin:0;padding:20px;background:var(--bg);color:var(--text);transition:background .3s,color .3s;}
 h1,h2,h3{margin-top:0;text-align:center;}
 .container{max-width:700px;margin:auto;}
-.card{
-  background:var(--card);
-  border-radius:12px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 4px 10px rgba(0,0,0,.2);
-  transition: background .3s;
-}
-input,button{
-  padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:1rem;
-}
+.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 4px 10px rgba(0,0,0,.2);transition: background .3s;}
+input,button{padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:1rem;}
 input{width: calc(100% - 20px);}
-button{
-  background:var(--accent);
-  color:white;
-  border:none;
-  cursor:pointer;
-  transition: background .2s;
-  font-weight:bold;
-}
+button{background:var(--accent);color:white;border:none;cursor:pointer;transition: background .2s;font-weight:bold;}
 button:hover{background:var(--accent-hover);}
 .hidden{display:none;}
-.todo{
-  border:1px solid #ddd;
-  border-radius:10px;
-  padding:15px;
-  margin:10px 0;
-  background:var(--card);
-  box-shadow:0 2px 5px rgba(0,0,0,.1);
-}
+.todo{border:1px solid #ddd;border-radius:10px;padding:15px;margin:10px 0;background:var(--card);box-shadow:0 2px 5px rgba(0,0,0,.1);}
 .task-header{display:flex;justify-content:space-between;align-items:center;}
-.theme-toggle{
-  float:right;background:transparent;border:2px solid var(--accent);
-  color:var(--accent);padding:6px 12px;border-radius:8px;font-size:0.9rem;
-}
+.theme-toggle{float:right;background:transparent;border:2px solid var(--accent);color:var(--accent);padding:6px 12px;border-radius:8px;font-size:0.9rem;}
 .theme-toggle:hover{background:var(--accent);color:#000;}
 .football-header{font-family:'Impact', sans-serif; color:var(--accent);}
 </style>
@@ -72,41 +29,40 @@ button:hover{background:var(--accent-hover);}
 <body>
 
 <div class="container">
-  <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
-  <h1 class="football-header">⚽ Fußball To-Do Liste</h1>
+<button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+<h1 class="football-header">⚽ Fußball To-Do Liste</h1>
 
-  <!-- LOGIN-BEREICH -->
-  <div id="loginDiv" class="card">
-    <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email"><br>
-    <input type="password" id="loginPassword" placeholder="Passwort"><br>
-    <button onclick="loginUser()">Login</button>
-    <p id="loginError" style="color:red;"></p>
-  </div>
+<!-- LOGIN-BEREICH -->
+<div id="loginDiv" class="card">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email"><br>
+  <input type="password" id="loginPassword" placeholder="Passwort"><br>
+  <button onclick="loginUser()">Login</button>
+  <p id="loginError" style="color:red;"></p>
+</div>
 
-  <!-- REGISTRIERUNG-BEREICH -->
-  <div id="registerDiv" class="card">
-    <h2>Registrierung</h2>
-    <input type="email" id="regEmail" placeholder="Email"><br>
-    <input type="password" id="regPassword" placeholder="Passwort"><br>
-    <button onclick="registerUser()">Registrieren</button>
-    <p id="registerError" style="color:red;"></p>
-  </div>
+<!-- REGISTRIERUNG-BEREICH -->
+<div id="registerDiv" class="card">
+  <h2>Registrierung</h2>
+  <input type="email" id="regEmail" placeholder="Email"><br>
+  <input type="password" id="regPassword" placeholder="Passwort"><br>
+  <button onclick="registerUser()">Registrieren</button>
+  <p id="registerError" style="color:red;"></p>
+</div>
 
-  <!-- TO-DO LISTE -->
-  <div id="todoDiv" class="hidden card">
-    <h2>Hallo, <span id="userName"></span>!</h2>
-    <div class="card">
-      <h3>Neue Aufgabe</h3>
-      <input type="text" id="taskTitle" placeholder="Titel der Aufgabe">
-      <input type="date" id="taskDate">
-      <input type="time" id="taskTime">
-      <input type="text" id="taskNote" placeholder="Mitteilung (optional)">
-      <button onclick="addTask()">➕ Hinzufügen</button>
-    </div>
-    <h3>Aufgaben:</h3>
-    <div id="taskList"></div>
+<!-- TO-DO LISTE -->
+<div id="todoDiv" class="hidden card">
+  <h2>Hallo, <span id="userName"></span>!</h2>
+  <div class="card">
+    <h3>Neue Aufgabe</h3>
+    <input type="text" id="taskTitle" placeholder="Titel der Aufgabe">
+    <input type="date" id="taskDate">
+    <input type="time" id="taskTime">
+    <input type="text" id="taskNote" placeholder="Mitteilung (optional)">
+    <button onclick="addTask()">➕ Hinzufügen</button>
   </div>
+  <h3>Aufgaben:</h3>
+  <div id="taskList"></div>
 </div>
 
 <script>
@@ -118,9 +74,20 @@ if(localStorage.getItem("theme")==="dark"){document.body.classList.add("dark");d
 function toggleTheme(){document.body.classList.toggle("dark"); const btn=document.querySelector(".theme-toggle"); if(document.body.classList.contains("dark")){localStorage.setItem("theme","dark"); btn.innerText="☀️ Light Mode";}else{localStorage.setItem("theme","light"); btn.innerText="🌙 Dark Mode";}}
 
 // Supabase
-const SUPABASE_URL = 'DEINE_SUPABASE_URL';
-const SUPABASE_KEY = 'DEIN_ANON_KEY';
-const supabase = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const SUPABASE_URL = 'https://qmixopnpojywdayctmhp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtaXhvcG5wb2p5d2FheWN0bWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MDE0NjQsImV4cCI6MjA3NTA3NzQ2NH0.MPMhA0-G2_nFysi0Vvb57b8CmrxxLh_oxlStnKU_UcA';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Automatischer Testbenutzer Marvin/12345
+async function addTestUser(){
+  const email="marvin@example.com";
+  const password="12345";
+  try {
+    await supabase.auth.signUp({email,password});
+    console.log("Testbenutzer Marvin wurde erstellt");
+  } catch(e){ console.log("Marvin existiert möglicherweise schon"); }
+}
+addTestUser();
 
 // Registrierung
 async function registerUser(){
@@ -189,4 +156,3 @@ async function deleteTask(id){
 </script>
 </body>
 </html>
-
