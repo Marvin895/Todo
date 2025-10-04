@@ -37,7 +37,7 @@ button:hover{background:var(--accent-hover);}
   <h2>Login</h2>
   <input type="email" id="loginEmail" placeholder="Email"><br>
   <input type="password" id="loginPassword" placeholder="Passwort"><br>
-  <button onclick="loginUser()">Login</button>
+  <button type="button" onclick="loginUser()">Login</button>
   <p id="loginError" style="color:red;"></p>
 </div>
 
@@ -46,7 +46,7 @@ button:hover{background:var(--accent-hover);}
   <h2>Registrierung</h2>
   <input type="email" id="regEmail" placeholder="Email"><br>
   <input type="password" id="regPassword" placeholder="Passwort"><br>
-  <button onclick="registerUser()">Registrieren</button>
+  <button type="button" onclick="registerUser()">Registrieren</button>
   <p id="registerError" style="color:red;"></p>
 </div>
 
@@ -59,7 +59,7 @@ button:hover{background:var(--accent-hover);}
     <input type="date" id="taskDate">
     <input type="time" id="taskTime">
     <input type="text" id="taskNote" placeholder="Mitteilung (optional)">
-    <button onclick="addTask()">➕ Hinzufügen</button>
+    <button type="button" onclick="addTask()">➕ Hinzufügen</button>
   </div>
   <h3>Aufgaben:</h3>
   <div id="taskList"></div>
@@ -70,22 +70,35 @@ let currentUser=null;
 const adminEmails=["admin@example.com"]; // Admins
 
 // Dark Mode
-if(localStorage.getItem("theme")==="dark"){document.body.classList.add("dark");document.querySelector(".theme-toggle").innerText="☀️ Light Mode";}
-function toggleTheme(){document.body.classList.toggle("dark"); const btn=document.querySelector(".theme-toggle"); if(document.body.classList.contains("dark")){localStorage.setItem("theme","dark"); btn.innerText="☀️ Light Mode";}else{localStorage.setItem("theme","light"); btn.innerText="🌙 Dark Mode";}}
+if(localStorage.getItem("theme")==="dark"){
+  document.body.classList.add("dark");
+  document.querySelector(".theme-toggle").innerText="☀️ Light Mode";
+}
+function toggleTheme(){
+  document.body.classList.toggle("dark"); 
+  const btn=document.querySelector(".theme-toggle"); 
+  if(document.body.classList.contains("dark")){
+    localStorage.setItem("theme","dark"); 
+    btn.innerText="☀️ Light Mode";
+  } else {
+    localStorage.setItem("theme","light"); 
+    btn.innerText="🌙 Dark Mode";
+  }
+}
 
 // Supabase
 const SUPABASE_URL = 'https://qmixopnpojywdayctmhp.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtaXhvcG5wb2p5d2FheWN0bWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MDE0NjQsImV4cCI6MjA3NTA3NzQ2NH0.MPMhA0-G2_nFysi0Vvb57b8CmrxxLh_oxlStnKU_UcA';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Automatischer Testbenutzer Marvin/12345
+// Testbenutzer Marvin/12345
 async function addTestUser(){
-  const email="marvin@example.com";
-  const password="12345";
   try {
-    await supabase.auth.signUp({email,password});
-    console.log("Testbenutzer Marvin wurde erstellt");
-  } catch(e){ console.log("Marvin existiert möglicherweise schon"); }
+    await supabase.auth.signUp({email:"marvin@example.com",password:"12345"});
+    console.log("Testbenutzer Marvin erstellt (falls nicht vorhanden)");
+  } catch(e){
+    console.log("Marvin existiert möglicherweise schon", e);
+  }
 }
 addTestUser();
 
@@ -94,10 +107,16 @@ async function registerUser(){
   const email=document.getElementById("regEmail").value;
   const password=document.getElementById("regPassword").value;
   document.getElementById("registerError").innerText="";
-  if(!email||!password){ document.getElementById("registerError").innerText="Email und Passwort erforderlich"; return;}
+  if(!email||!password){ 
+    document.getElementById("registerError").innerText="Email und Passwort erforderlich"; 
+    return;
+  }
   const { data, error } = await supabase.auth.signUp({email,password});
-  if(error){ document.getElementById("registerError").innerText=error.message;}
-  else{ alert("Registriert! Bitte Mail bestätigen, falls aktiviert."); }
+  if(error){ 
+    document.getElementById("registerError").innerText=error.message;
+  } else { 
+    alert("Registriert! Bitte Mail bestätigen, falls aktiviert."); 
+  }
 }
 
 // Login
@@ -105,9 +124,15 @@ async function loginUser(){
   const email=document.getElementById("loginEmail").value;
   const password=document.getElementById("loginPassword").value;
   document.getElementById("loginError").innerText="";
-  if(!email||!password){ document.getElementById("loginError").innerText="Email und Passwort erforderlich"; return;}
+  if(!email||!password){ 
+    document.getElementById("loginError").innerText="Email und Passwort erforderlich"; 
+    return;
+  }
   const { data, error } = await supabase.auth.signInWithPassword({email,password});
-  if(error){ document.getElementById("loginError").innerText=error.message; return;}
+  if(error){ 
+    document.getElementById("loginError").innerText=error.message; 
+    return;
+  }
   currentUser = data.user;
   onLogin();
 }
@@ -129,7 +154,10 @@ async function addTask(){
   const note=document.getElementById("taskNote").value;
   if(!title||!date||!time){ alert("Pflichtfelder ausfüllen"); return;}
   await supabase.from('tasks').insert([{user_id:currentUser.id,title,date,time,note}]);
-  document.getElementById("taskTitle").value=""; document.getElementById("taskDate").value=""; document.getElementById("taskTime").value=""; document.getElementById("taskNote").value="";
+  document.getElementById("taskTitle").value=""; 
+  document.getElementById("taskDate").value=""; 
+  document.getElementById("taskTime").value=""; 
+  document.getElementById("taskNote").value="";
   loadTasks();
 }
 
