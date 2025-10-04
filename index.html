@@ -14,11 +14,13 @@ button:hover{background:#ffcc00;}
 .hidden{display:none;}
 .slot-card{border:1px solid #fff;border-radius:10px;padding:10px;margin:10px 0;}
 h1,h2{margin-top:0;text-align:center;}
+#adminLoginDiv{display:none;} /* versteckt */
+#adminButton{position:fixed;top:5px;right:5px;background:#0b3d0b;color:#0b3d0b;border:none;cursor:pointer;}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>⚽ Fußball Anmeldung</h1>
+<h1 id="logo">⚽ Fußball Anmeldung</h1>
 
 <!-- Benutzer Anmeldung -->
 <div id="userDiv" class="card">
@@ -32,6 +34,9 @@ h1,h2{margin-top:0;text-align:center;}
   <button onclick="registerUser()">Anmelden</button>
   <p id="loginError" style="color:red;"></p>
 </div>
+
+<!-- Admin Button (unsichtbar) -->
+<button id="adminButton" onclick="toggleAdminLogin()">⚙️</button>
 
 <!-- Admin Login -->
 <div id="adminLoginDiv" class="card">
@@ -75,7 +80,7 @@ function registerUser(){
   slots[slot].push(name);
   document.getElementById("userDiv").classList.add("hidden");
   alert(`Willkommen ${name}! Sie sind für ${slot} Uhr angemeldet.`);
-  renderAdmin(); // Adminbereich aktualisieren, falls bereits angemeldet
+  renderAdmin(); // Adminbereich aktualisieren
 }
 
 // Admin Login
@@ -91,6 +96,12 @@ function loginAdmin(){
   } else {
     errorP.innerText = "Falscher Name oder Passwort!";
   }
+}
+
+// Admin Login ein-/ausblenden
+function toggleAdminLogin(){
+  const div = document.getElementById("adminLoginDiv");
+  div.style.display = div.style.display === "none" ? "block" : "none";
 }
 
 // Adminbereich anzeigen
