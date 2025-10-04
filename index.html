@@ -3,183 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚽ Fußball To-Do Liste</title>
+<title>⚽ Fußball Anmeldung</title>
 <style>
-:root{
-  --bg:#0b3d0b; --card:#ffffffcc; --text:#0b3d0b; --accent:#ffd700; --accent-hover:#ffcc00;
-}
-body.dark{--bg:#072107;--card:#1a1a1acc;--text:#fff;--accent:#ffd700;--accent-hover:#ffcc00;}
-body{font-family:'Arial',sans-serif;margin:0;padding:20px;background:var(--bg);color:var(--text);transition:background .3s,color .3s;}
-h1,h2,h3{margin-top:0;text-align:center;}
+body{font-family:Arial,sans-serif;background:#0b3d0b;color:#fff;padding:20px;}
 .container{max-width:700px;margin:auto;}
-.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 4px 10px rgba(0,0,0,.2);transition: background .3s;}
-input,button{padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:1rem;}
-input{width: calc(100% - 20px);}
-button{background:var(--accent);color:white;border:none;cursor:pointer;transition: background .2s;font-weight:bold;}
-button:hover{background:var(--accent-hover);}
+.card{background:#ffffff22;padding:20px;border-radius:12px;margin-bottom:20px;}
+input,select,button{padding:10px;margin:5px 0;border-radius:8px;border:none;font-size:1rem;}
+button{background:#ffd700;color:#000;cursor:pointer;font-weight:bold;}
+button:hover{background:#ffcc00;}
 .hidden{display:none;}
-.todo{border:1px solid #ddd;border-radius:10px;padding:15px;margin:10px 0;background:var(--card);box-shadow:0 2px 5px rgba(0,0,0,.1);}
-.task-header{display:flex;justify-content:space-between;align-items:center;}
-.theme-toggle{float:right;background:transparent;border:2px solid var(--accent);color:var(--accent);padding:6px 12px;border-radius:8px;font-size:0.9rem;}
-.theme-toggle:hover{background:var(--accent);color:#000;}
-.football-header{font-family:'Impact', sans-serif; color:var(--accent);}
+.slot-card{border:1px solid #fff;border-radius:10px;padding:10px;margin:10px 0;}
+h1,h2{margin-top:0;text-align:center;}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
 <div class="container">
-<button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
-<h1 class="football-header">⚽ Fußball To-Do Liste</h1>
+<h1>⚽ Fußball Anmeldung</h1>
 
-<!-- LOGIN-BEREICH -->
-<div id="loginDiv" class="card">
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email"><br>
-  <input type="password" id="loginPassword" placeholder="Passwort"><br>
-  <button type="button" onclick="loginUser()">Login</button>
+<!-- Benutzer wählt Zeit-Slot -->
+<div id="userDiv" class="card">
+  <h2>Benutzer Anmeldung</h2>
+  <input type="text" id="userName" placeholder="Name"><br>
+  <label for="slotSelect">Wähle Zeit-Slot:</label><br>
+  <select id="slotSelect">
+    <option value="17-19">17-19 Uhr</option>
+    <option value="19-21">19-21 Uhr</option>
+  </select><br>
+  <button onclick="registerUser()">Anmelden</button>
   <p id="loginError" style="color:red;"></p>
 </div>
 
-<!-- REGISTRIERUNG-BEREICH -->
-<div id="registerDiv" class="card">
-  <h2>Registrierung</h2>
-  <input type="email" id="regEmail" placeholder="Email"><br>
-  <input type="password" id="regPassword" placeholder="Passwort"><br>
-  <button type="button" onclick="registerUser()">Registrieren</button>
-  <p id="registerError" style="color:red;"></p>
-</div>
-
-<!-- TO-DO LISTE -->
-<div id="todoDiv" class="hidden card">
-  <h2>Hallo, <span id="userName"></span>!</h2>
+<!-- Admin Bereich -->
+<div id="adminDiv" class="hidden card">
+  <h2>Administratorbereich</h2>
+  <div id="slots"></div>
   <div class="card">
-    <h3>Neue Aufgabe</h3>
-    <input type="text" id="taskTitle" placeholder="Titel der Aufgabe">
-    <input type="date" id="taskDate">
-    <input type="time" id="taskTime">
-    <input type="text" id="taskNote" placeholder="Mitteilung (optional)">
-    <button type="button" onclick="addTask()">➕ Hinzufügen</button>
+    <h3>Aufgabe vergeben</h3>
+    <select id="assignUserSelect"></select><br>
+    <input type="text" id="taskTitle" placeholder="Aufgabe"><br>
+    <button onclick="assignTask()">➕ Aufgabe vergeben</button>
   </div>
-  <h3>Aufgaben:</h3>
   <div id="taskList"></div>
+</div>
 </div>
 
 <script>
-let currentUser=null;
-const adminEmails=["admin@example.com"]; // Admins
+const maxPerSlot = 5;
+let slots = {
+  "17-19": [],
+  "19-21": []
+};
+let tasks = [];
 
-// Dark Mode
-if(localStorage.getItem("theme")==="dark"){
-  document.body.classList.add("dark");
-  document.querySelector(".theme-toggle").innerText="☀️ Light Mode";
-}
-function toggleTheme(){
-  document.body.classList.toggle("dark"); 
-  const btn=document.querySelector(".theme-toggle"); 
-  if(document.body.classList.contains("dark")){
-    localStorage.setItem("theme","dark"); 
-    btn.innerText="☀️ Light Mode";
-  } else {
-    localStorage.setItem("theme","light"); 
-    btn.innerText="🌙 Dark Mode";
-  }
-}
-
-// Supabase initialisieren
-const SUPABASE_URL = 'https://qmixopnpojywdayctmhp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtaXhvcG5wb2p5d2FheWN0bWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MDE0NjQsImV4cCI6MjA3NTA3NzQ2NH0.MPMhA0-G2_nFysi0Vvb57b8CmrxxLh_oxlStnKU_UcA';
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Testbenutzer Marvin/12345
-async function addTestUser(){
-  try {
-    await supabase.auth.signUp({email:"marvin@example.com",password:"12345"});
-    console.log("Testbenutzer Marvin erstellt (falls nicht vorhanden)");
-  } catch(e){
-    console.log("Marvin existiert möglicherweise schon", e);
-  }
-}
-addTestUser();
-
-// Registrierung
-async function registerUser(){
-  const email=document.getElementById("regEmail").value;
-  const password=document.getElementById("regPassword").value;
-  document.getElementById("registerError").innerText="";
-  if(!email||!password){ 
-    document.getElementById("registerError").innerText="Email und Passwort erforderlich"; 
-    return;
-  }
-  const { data, error } = await supabase.auth.signUp({email,password});
-  if(error){ 
-    document.getElementById("registerError").innerText=error.message;
-  } else { 
-    alert("Registriert! Bitte Mail bestätigen, falls aktiviert."); 
-  }
+// Benutzer anmelden
+function registerUser(){
+  const name = document.getElementById("userName").value.trim();
+  const slot = document.getElementById("slotSelect").value;
+  const errorP = document.getElementById("loginError");
+  errorP.innerText="";
+  if(!name){ errorP.innerText="Name erforderlich"; return; }
+  if(slots[slot].length >= maxPerSlot){ errorP.innerText="Dieser Slot ist voll"; return; }
+  slots[slot].push(name);
+  document.getElementById("userDiv").classList.add("hidden");
+  alert(`Willkommen ${name}! Sie sind für ${slot} Uhr angemeldet.`);
+  renderAdmin();
 }
 
-// Login
-async function loginUser(){
-  const email=document.getElementById("loginEmail").value;
-  const password=document.getElementById("loginPassword").value;
-  document.getElementById("loginError").innerText="";
-  if(!email||!password){ 
-    document.getElementById("loginError").innerText="Email und Passwort erforderlich"; 
-    return;
-  }
-  const { data, error } = await supabase.auth.signInWithPassword({email,password});
-  if(error){ 
-    document.getElementById("loginError").innerText=error.message; 
-    return;
-  }
-  currentUser = data.user;
-  onLogin();
-}
-
-// Nach Login
-function onLogin(){
-  document.getElementById("loginDiv").classList.add("hidden");
-  document.getElementById("registerDiv").classList.add("hidden");
-  document.getElementById("todoDiv").classList.remove("hidden");
-  document.getElementById("userName").innerText=currentUser.email;
-  loadTasks();
-}
-
-// Aufgabe hinzufügen
-async function addTask(){
-  const title=document.getElementById("taskTitle").value;
-  const date=document.getElementById("taskDate").value;
-  const time=document.getElementById("taskTime").value;
-  const note=document.getElementById("taskNote").value;
-  if(!title||!date||!time){ alert("Pflichtfelder ausfüllen"); return;}
-  await supabase.from('tasks').insert([{user_id:currentUser.id,title,date,time,note}]);
-  document.getElementById("taskTitle").value=""; 
-  document.getElementById("taskDate").value=""; 
-  document.getElementById("taskTime").value=""; 
-  document.getElementById("taskNote").value="";
-  loadTasks();
-}
-
-// Aufgaben laden
-async function loadTasks(){
-  let { data, error } = await supabase.from('tasks').select('*').order('created_at',{ascending:true});
-  if(error){ console.error(error); return;}
-  const listDiv=document.getElementById("taskList");
-  listDiv.innerHTML="";
-  data.forEach(task=>{
-    if(!adminEmails.includes(currentUser.email) && task.user_id!==currentUser.id) return;
-    const div=document.createElement("div");
-    div.className="todo";
-    div.innerHTML=`<div class="task-header"><strong>${task.title}</strong><button onclick="deleteTask(${task.id})">❌</button></div>📅 ${task.date} ⏰ ${task.time}<br>💬 ${task.note || "(keine Mitteilung)"}`;
-    listDiv.appendChild(div);
+// Adminbereich anzeigen
+function renderAdmin(){
+  document.getElementById("adminDiv").classList.remove("hidden");
+  const slotsDiv = document.getElementById("slots");
+  slotsDiv.innerHTML="";
+  Object.keys(slots).forEach(s=>{
+    slotsDiv.innerHTML += `<div class="slot-card"><strong>${s} Uhr:</strong> ${slots[s].join(", ") || "(keine Anmeldung)"}</div>`;
+  });
+  const assignSelect = document.getElementById("assignUserSelect");
+  assignSelect.innerHTML="";
+  Object.values(slots).flat().forEach((u,i)=>{
+    assignSelect.innerHTML += `<option value="${i}">${u}</option>`;
   });
 }
 
-// Aufgabe löschen
-async function deleteTask(id){
-  await supabase.from('tasks').delete().eq('id',id);
-  loadTasks();
+// Aufgabe vergeben
+function assignTask(){
+  const userIndex = document.getElementById("assignUserSelect").value;
+  const title = document.getElementById("taskTitle").value.trim();
+  if(!title){ alert("Aufgabe erforderlich"); return; }
+  const allUsers = Object.values(slots).flat();
+  tasks.push({user: allUsers[userIndex], title});
+  document.getElementById("taskTitle").value="";
+  renderTasks();
+}
+
+// Aufgaben anzeigen
+function renderTasks(){
+  const taskList = document.getElementById("taskList");
+  taskList.innerHTML="";
+  tasks.forEach(t=>{
+    taskList.innerHTML += `<div class="slot-card"><strong>${t.user}</strong>: ${t.title}</div>`;
+  });
 }
 </script>
 </body>
